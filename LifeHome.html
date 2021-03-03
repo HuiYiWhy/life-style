@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Life Activity</title>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://weareoutman.github.io/clockpicker/dist/jquery-clockpicker.min.js"></script>
+    <link href="https://weareoutman.github.io/clockpicker/dist/jquery-clockpicker.min.css" rel="stylesheet" />
+
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            text-align: center;
+            padding: 16px;
+        }
+
+        .center {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .button {
+            background-color: #4CAF50; /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 12px;
+            visibility:hidden;
+            margin-left:auto;
+            margin-right:auto;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+
+            var newestStartTime = "12:00 AM";
+            var rowCount = 1;
+            var activityList = [];
+
+            $("#btnAddRow").click(function () {
+
+                var ary = [];
+                ary.push({ Name: 'a1', Value: 'v1', Extra: 'e1' });
+                ary.push({ Name: 'a2', Value: 'v2', Extra: 'e2' });
+                ary.push({ Name: 'a3', Value: 'v3', Extra: 'e3' });
+
+                objIndex = ary.findIndex((obj => obj.Name == 'a2'));
+
+
+                //Getting value from to populate
+                var startTime = $("#txtStartTime").val();
+                var endTime = $("#endClock").val();
+                var activity = $('#myActivity').val();
+                var duration = $('#txtDuration').val();
+
+                if (endTime.length <= 0) {
+                    alert('Please select a correct time end for activity.');
+                    return;
+                }
+
+                if (newestStartTime == null) {
+                    newestStartTime = $("#endClock").val();
+                } else {
+                    var startMinute = convertToMinutes($("#txtStartTime").val().toLowerCase());
+                    var endMinute = convertToMinutes($("#endClock").val().toLowerCase());
+                    if (startMinute >= endMinute) {
+                        alert('Please select a correct time end for activity.');
+                        return;
+                    }
+                }
+
+                newestStartTime = $("#endClock").val();
+
+                //Prepare TR to add in Table
+                var tr;
+                tr = $('<tr/>');
+
+                tr.append("<td>" + rowCount + "</td>");
+                tr.append("<td>" + startTime + "</td>");
+                tr.append("<td>" + endTime + "</td>");
+                tr.append("<td>" + activity + "</td>");
+                tr.append("<td>" + duration + "</td>");
+
+                $('#lifeTable').append(tr);
+                rowCount = rowCount + 1;
+                activityList.push({ Id: rowCount, StartTime: startTime, EndTime: endTime, Activity: activity, Duration: duration });
+
+                $("#endClock").val(endTime);
+                $("#txtStartTime").val(endTime);
+                $("#myActivity")[0].selectedIndex = 0;
+                $('#txtDuration').val('');
+
+                if (endTime == "12:00AM") {
+                    $("#inputTable").hide();
+                    populateResult();
+                }
+            });
+
+            function populateResult() {
+
+                var HealthCount = 0;
+                var KnowledgeCount = 0;
+                var FamilyCount = 0;
+                var SelfEntertainmentCount = 0;
+                var MoneyCount = 0;
+                var ForSociety = 0;
+
+                for (var i in activityList) {
+                    switch (activityList[i].Activity) {
+                        case "Rest":
+                        case "Exercise/Sport":
+                        case "Meditation":
+                        case "Eat":
+                            HealthCount = HealthCount +  parseInt(activityList[i].Duration);
+                            break;
+                        case "Reading":
+                        case "Self Improvement":
+                        case "Faith":
+                        case "Social Activity":
+                            KnowledgeCount = KnowledgeCount + parseInt(activityList[i].Duration);
+                            break;
+                        case "Family Activity":
+                        case "Family Eating":
+                        case "Family Outing":
+                            FamilyCount = FamilyCount + parseInt(activityList[i].Duration);
+                            break;
+                        case "Hobby Activity":
+                        case "Gaming":
+                            SelfEntertainmentCount = SelfEntertainmentCount + parseInt(activityList[i].Duration);
+                            break;
+                        case "Working":
+                        case "Part Time":
+                        case "Transsport":
+                            MoneyCount = MoneyCount + parseInt(activityList[i].Duration);
+                            break;
+
+                    }
+                }
+
+                $('#resultTable').append('<thead><tr></tr></thead>');
+                $thead = $('#resultTable > thead > tr:first');
+                $thead.append('<th>Health</th>');
+                $thead.append('<th>Knowledge</th>');
+                $thead.append('<th>Family</th>');
+                $thead.append('<th>Self Entertainment</th>');
+                $thead.append('<th>Money</th>');
+                $thead.append('<th>For Society</th>');
+
+                var tr;
+                tr = $('<tr/>');
+
+                tr.append("<td>" + convertMinsToHrsMins(HealthCount) + "</td>");
+                tr.append("<td>" + convertMinsToHrsMins(KnowledgeCount) + "</td>");
+                tr.append("<td>" + convertMinsToHrsMins(FamilyCount) + "</td>");
+                tr.append("<td>" + convertMinsToHrsMins(SelfEntertainmentCount) + "</td>");
+                tr.append("<td>" + convertMinsToHrsMins(MoneyCount) + "</td>");
+                tr.append("<td>" + convertMinsToHrsMins(ForSociety) + "</td>");
+
+                $('#resultTable').append(tr);
+
+                $("#btnRedo").css("visibility", "visible");
+            }
+
+            function convertMinsToHrsMins(minutes) {
+                var h = Math.floor(minutes / 60);
+                var m = minutes % 60;
+                h = h < 10 ? '0' + h : h;
+                m = m < 10 ? '0' + m : m;
+                return h + ':' + m;
+            }
+
+            var clocky = $('#endClock').clockpicker({
+                donetext: "Done",
+                twelvehour: true,
+                afterDone: function () {
+                    var clock = $("#endClock").val().toLowerCase();
+                    var n = convertToMinutes(clock);
+                    if (newestStartTime == null) {
+                        $('#txtDuration').val(n);
+                    } else {
+                        var diff = n - convertToMinutes(newestStartTime.toLowerCase());
+                        $('#txtDuration').val(diff);
+                    }
+                },
+            });
+
+            function convertToMinutes(time) {
+
+                var timeArr = time.split(':');
+                var hour = parseInt(timeArr[0]);
+                var minute = parseInt(timeArr[1].substr(0, 2));
+
+                if (time == '12:00am') {
+                    if (newestStartTime != '12:00AM') {
+                        $("#endClock").val('12:00AM');
+                        return 24 * 60;
+                    }
+                }
+
+                if (hour == 12) {
+                    hour = 0;
+                }
+
+                var totalMinute = hour * 60 + minute;
+
+                if (time.indexOf('pm') != -1) {
+                    totalMinute = totalMinute + 12 * 60;
+                }
+
+                return totalMinute;
+
+            }
+
+            $("#btnRedo").click(function () {
+                location.reload(true);
+            });
+        });
+
+       
+
+    </script>
+</head>
+<body>
+
+    <table id="lifeTable" class="center">
+        <thead>
+            <tr style="font-weight:bold;">
+                <th width="10%">No.</th>
+                <th width="20%">Time start</th>
+                <th width="20%">Time end</th>
+                <th width="25%">Activity</th>
+                <th width="15%">Total Mminutes</th>
+                <th width="10%"></th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <br />
+
+    <table id="inputTable" class="center">
+        <tr>
+            <td width="10%"></td>
+            <td width="20%">
+                <input id="txtStartTime" type="text" readonly value="12:00 AM" />
+            </td>
+            <td width="20%">
+                <div>
+                    <input type="text" id="endClock" value="" />
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-time"></span>
+                    </span>
+                </div>
+            </td>
+            <td width="25%">
+                <select id='myActivity'>
+                    <option value="Rest">Rest</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Exercise/Sport">Exercise/Sport</option>
+                    <option value="Faith">Faith</option>
+                    <option value="Eat">Eat</option>
+                    <option value="Social Activity">Social Activity</option>
+                    <option value="Reading">Reading</option>
+                    <option value="Family Activity">Family Activity</option>
+                    <option value="Gaming">Gaming</option>
+                    <option value="Working">Working</option>
+                    <option value="Family Eating">Family Eating</option>
+                    <option value="Self Improvement">Self Improvement</option>
+                    <option value="Hobby Activity">Hobby Activity</option>
+                    <option value="Meditation">Meditation</option>
+                    <option value="Family Outing">Family Outing</option>
+                    <option value="Family Outing">Part Time</option>
+                </select>
+            </td>
+            <td width="15%">
+                <input id="txtDuration" type="text" readonly />
+            </td>
+            <td width="10%">
+                <input type="button" value="Set" id="btnAddRow" />
+            </td>
+        </tr>
+    </table>
+
+    <table id="resultTable" class="center"></table>
+    <div style="text-align:center; margin-top:10px">
+        <button id="btnRedo" class="button" hidden>Redo</button>
+    </div>
+    
+
+
+</body>
+</html>
