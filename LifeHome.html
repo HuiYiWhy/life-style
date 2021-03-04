@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -168,6 +168,18 @@
 
                 $('#resultTable').append(tr);
 
+                var tr;
+                tr = $('<tr/>');
+
+                tr.append("<td>" + calculateTimePercentage(HealthCount) + "</td>");
+                tr.append("<td>" + calculateTimePercentage(KnowledgeCount) + "</td>");
+                tr.append("<td>" + calculateTimePercentage(FamilyCount) + "</td>");
+                tr.append("<td>" + calculateTimePercentage(SelfEntertainmentCount) + "</td>");
+                tr.append("<td>" + calculateTimePercentage(MoneyCount) + "</td>");
+                tr.append("<td>" + calculateTimePercentage(ForSociety) + "</td>");
+
+                $('#resultTable').append(tr);
+
                 $("#btnRedo").css("visibility", "visible");
             }
 
@@ -177,6 +189,13 @@
                 h = h < 10 ? '0' + h : h;
                 m = m < 10 ? '0' + m : m;
                 return h + ':' + m;
+            }
+
+            function calculateTimePercentage(minutes) {
+                var result = parseInt(minutes) * 100 / (24*60);
+                var rounded = Math.round(result * 10) / 10;
+                if (!isFinite(result)) result = 0;
+                return rounded.toString() + "%";
             }
 
             var clocky = $('#endClock').clockpicker({
